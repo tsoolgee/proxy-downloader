@@ -24,11 +24,14 @@ jobs:
             FILENAME="downloaded_file"
           fi
           echo "Downloading as: $FILENAME"
-          curl -L -o "$FILENAME" "${{ env.DOWNLOAD_URL }}"
+          
+          # יצירת תיקייה נפרדת והורדה לתוכה
+          mkdir downloads
+          curl -L -o "downloads/$FILENAME" "${{ env.DOWNLOAD_URL }}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: downloaded-file
-          path: ./* # Uploads all files in the current directory (should be just the downloaded file)
-          retention-days: 1 # Keep artifacts for 1 day
+          path: downloads/ # העלאת התיקייה הייעודית בלבד
+          retention-days: 1
