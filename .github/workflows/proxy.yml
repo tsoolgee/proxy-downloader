@@ -8,30 +8,24 @@ jobs:
   download:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Get URL from payload
-        id: get_url
-        run: echo "DOWNLOAD_URL=${{ github.event.client_payload.url }}" >> $GITHUB_ENV
-
       - name: Download file
         run: |
-          echo "Attempting to download: ${{ env.DOWNLOAD_URL }}"
-          # Extract filename from URL
-          FILENAME=$(basename "${{ env.DOWNLOAD_URL }}" | sed 's/\?.*//' | sed 's/\#.*//')
-          if [ -z "$FILENAME" ]; then
-            FILENAME="downloaded_file"
-          fi
-          echo "Downloading as: $FILENAME"
+          mkdir -p downloads
+          # שימוש ב-client_payload כדי לקבל גם את ה-ID הייחודי
+          URL="${{ github.event.client_payload.url }}"
+          REQ_ID="${{ github.event.client_payload.req_id }}"
           
-          # יצירת תיקייה נפרדת והורדה לתוכה
-          mkdir downloads
-          curl -L -o "downloads/$FILENAME" "${{ env.DOWNLOAD_URL }}"
+          FILENAME=$(basename "$URL" | sed 's/\?.*//' | sed 's/\#.*//')
+          if [ -z "$FILENAME" ]; then FILENAME="downloaded_file"; fi
+          
+          echo "Downloading $URL"
+          curl -L -o "downloads/$FILENAME" "$URL"
+          # שמירת ה-ID כדי שהאתר יוכל לזהות את הריצה
+          echo "$REQ_ID" > "downloads/request_id.txt"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: downloaded-file
-          path: downloads/ # העלאת התיקייה הייעודית בלבד
+          name: download-${{ github.event.client_payload.req_id }}
+          path: downloads/
           retention-days: 1
