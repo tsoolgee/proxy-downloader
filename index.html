@@ -98,9 +98,9 @@
     </div>
 
     <script>
-        const owner = 'tsoolgee'; // שנה ליוזר שלך ב-GitHub
-        const repo = 'proxy-downloader'; // שנה לשם המאגר שלך
-        const githubToken = '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'; // הטוקן הוזן כאן
+        const owner = 'tsoolgee';
+        const repo = 'proxy-downloader';
+        const githubToken = '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'; 
         const statusDiv = document.getElementById('status');
         let currentRunId = null;
 
@@ -142,7 +142,7 @@
         }
 
         async function pollWorkflowStatus() {
-            const maxAttempts = 60; // כ-10 דקות המתנה (כל 10 שניות)
+            const maxAttempts = 60; // כ-10 דקות המתנה
             let attempts = 0;
 
             const interval = setInterval(async () => {
@@ -155,8 +155,8 @@
                 attempts++;
 
                 try {
-                    // Get recent workflow runs
-                    const runsResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/downloader.yml/runs`, {
+                    // כאן תוקן שם הקובץ ל- proxy.yml
+                    const runsResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/proxy.yml/runs`, {
                         headers: {
                             'Authorization': `token ${githubToken}`,
                             'Accept': 'application/vnd.github.v3+json'
@@ -187,7 +187,7 @@
                     clearInterval(interval);
                     statusDiv.classList.remove('loading');
                 }
-            }, 10000); // בדיקה כל 10 שניות
+            }, 10000);
         }
 
         async function getArtifacts(runId) {
@@ -203,7 +203,7 @@
                 if (artifactsData.artifacts && artifactsData.artifacts.length > 0) {
                     const latestArtifact = artifactsData.artifacts[0];
                     const artifactUrl = latestArtifact.archive_download_url;
-                    statusDiv.textContent += `\nקובץ מוכן להורדה! לחץ כאן: <a href="${artifactUrl}" target="_blank">הורד את ${latestArtifact.name}.zip</a>`;
+                    statusDiv.innerHTML += `<br><br><strong>קובץ מוכן להורדה! לחץ כאן:</strong> <a href="${artifactUrl}" target="_blank">הורד את ${latestArtifact.name}.zip</a>`;
                 } else {
                     statusDiv.textContent += '\nלא נמצאו Artifacts להורדה.';
                 }
