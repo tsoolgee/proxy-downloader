@@ -1,1 +1,34 @@
+name: Proxy Downloader
 
+on:
+  repository_dispatch:
+    types: [proxy_request]
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get URL from payload
+        id: get_url
+        run: echo "DOWNLOAD_URL=${{ github.event.client_payload.url }}" >> $GITHUB_ENV
+
+      - name: Download file
+        run: |
+          echo "Attempting to download: ${{ env.DOWNLOAD_URL }}"
+          # Extract filename from URL
+          FILENAME=$(basename "${{ env.DOWNLOAD_URL }}" | sed 's/\?.*//' | sed 's/\#.*//')
+          if [ -z "$FILENAME" ]; then
+            FILENAME="downloaded_file"
+          fi
+          echo "Downloading as: $FILENAME"
+          curl -L -o "$FILENAME" "${{ env.DOWNLOAD_URL }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: downloaded-file
+          path: ./* # Uploads all files in the current directory (should be just the downloaded file)
+          retention-days: 1 # Keep artifacts for 1 day
